@@ -1,6 +1,6 @@
 
 function love.conf(t)
     t.window.title = 'Super Belmont Bros.'
-    t.window.width = 1024
-    t.window.height = 576
+    t.window.width = 800
+    t.window.height = 600
 end

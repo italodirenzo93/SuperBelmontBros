@@ -28,10 +28,12 @@ function TiledMap:init(path)
 end
 
 
-function TiledMap:draw(width, height)
-    -- Iterate over each layer
-    for i, layer in ipairs(self.map.layers) do
+function TiledMap:draw()
+    -- Clear out the contents of the spritebatch
+    self.spritebatch:clear()
 
+    -- Iterate over each layer and add the quads to the spritebatch
+    for i, layer in ipairs(self.map.layers) do
         if layer.visible then
             -- Draw tiles
             for y = 0, layer.height - 1 do
@@ -51,7 +53,8 @@ function TiledMap:draw(width, height)
         end -- visible
     end -- layer
     
-    love.graphics.draw(self.spritebatch, 0, height - self.tileset.tileheight * self.map.height)
+    -- Draw the map
+    love.graphics.draw(self.spritebatch, 0, 0)
 end
 
 return TiledMap

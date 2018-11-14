@@ -1,48 +1,48 @@
 -- Module imports
 local push = require 'libs/push'
+local Camera = require 'libs/hump.camera'
 local TiledMap = require 'tiledmap'
-local Sprite = require 'sprite'
-
--- Screen vars
-local windowWidth, windowHeight = love.graphics.getDimensions()
-local virtualWidth = 432
-local virtualHeight = 243
+local Player = require 'player'
 
 -- Local vars
 local map = nil
 local mario = nil
+local camera = nil
 
 function love.load()
     -- Preserve the NES "pixelated" look
     love.graphics.setDefaultFilter('nearest', 'nearest')
 
     -- Load sprites
-    local texture = love.graphics.newImage('images/mario1.png')
-    mario = Sprite(texture, 0, 0)
+    mario = Player(50, 140)
 
     -- Load level
     map = TiledMap('maps/1-1')
 
-    -- Set up virtual screen resolution
-    push:setupScreen(virtualWidth, virtualHeight, windowWidth, windowHeight, {
-        fullscreen = false
-    })
+    -- Init camera
+    camera = Camera(mario:getX(), mario:getY(), 2)
 end
 
 function love.update(dt)
+    mario:update(dt)
 
-end
-
-function love.keypressed(key)
-
+    -- Camera follows player
+    local dx, dy = mario:getX() - camera.x, mario:getY() - camera.y
+    camera:move(dx/2, dy/2)
 end
 
 function love.draw()
-    push:start()
+    -- Begin drawing
+    camera:attach()
 
     -- Draw game
-    map:draw(virtualWidth, virtualHeight)
+    map:draw()
     mario:draw()
     
-    push:finish()
+    -- Finish drawing
+    camera:detach()
+
+    -- UI
+    local fps = love.timer.getFPS()
+    love.graphics.print('FPS: ' .. fps, 0 , 0)
 end
