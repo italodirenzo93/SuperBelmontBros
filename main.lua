@@ -14,7 +14,7 @@ function love.load()
     love.graphics.setDefaultFilter('nearest', 'nearest')
 
     -- Load sprites
-    mario = Player(50, 140)
+    mario = Player(50, 160)
 
     -- Load level
     map = TiledMap('maps/1-1')
