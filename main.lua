@@ -1,39 +1,48 @@
 -- Module imports
-local push = require 'push'
-local Map = require 'map'
+local push = require 'libs/push'
+local TiledMap = require 'tiledmap'
+local Sprite = require 'sprite'
 
 -- Screen vars
-local windowWidth = 1280
-local windowHeight = 720
+local windowWidth, windowHeight = love.graphics.getDimensions()
 local virtualWidth = 432
 local virtualHeight = 243
 
 -- Local vars
 local map = nil
+local mario = nil
 
 function love.load()
-    map = Map:new('maps/tilemap')
+    -- Preserve the NES "pixelated" look
+    love.graphics.setDefaultFilter('nearest', 'nearest')
 
-    -- push:setupScreen(virtualWidth, virtualHeight, windowWidth, windowHeight, {
-    --     fullscreen = false
-    -- })
+    -- Load sprites
+    local texture = love.graphics.newImage('images/mario1.png')
+    mario = Sprite(texture, 0, 0)
+
+    -- Load level
+    map = TiledMap('maps/1-1')
+
+    -- Set up virtual screen resolution
+    push:setupScreen(virtualWidth, virtualHeight, windowWidth, windowHeight, {
+        fullscreen = false
+    })
 end
-
 
 function love.update(dt)
 
 end
 
-
 function love.keypressed(key)
-    if key == 'left' or key == 'a' then
-        --love.graphics.translate()
-    end
+
 end
 
-
 function love.draw()
-    --push:start()
-    map:draw()
-    --push:finish()
+    push:start()
+
+    -- Draw game
+    map:draw(virtualWidth, virtualHeight)
+    mario:draw()
+    
+    push:finish()
 end

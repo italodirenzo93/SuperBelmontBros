@@ -1,16 +1,15 @@
+local Class = require 'libs/hump.class'
 
-local Map = {}
-Map.__index = Map
+local TiledMap = Class{}
 
-function Map:new(path)
-    local this = {}
-    this.map = require(path)
-    this.quads = {}
-    this.tileset = this.map.tilesets[1]
+function TiledMap:init(path)
+    self.map = require(path)
+    self.quads = {}
+    self.tileset = self.map.tilesets[1]
 
     -- Generate quads
-    local tileset = this.tileset
-    this.image = love.graphics.newImage('images/' .. tileset.image)
+    local tileset = self.tileset
+    self.image = love.graphics.newImage('images/' .. tileset.image)
     for y = 0, (tileset.imageheight / tileset.tileheight) - 1 do
         for x = 0, (tileset.imagewidth / tileset.tilewidth) -1 do
             local quad = love.graphics.newQuad(
@@ -20,19 +19,16 @@ function Map:new(path)
                 tileset.tileheight,
                 tileset.imagewidth,
                 tileset.imageheight)
-            table.insert(this.quads, quad)
+            table.insert(self.quads, quad)
         end
     end
 
     -- create a spritebatch
-    this.spritebatch = love.graphics.newSpriteBatch(this.image, #this.quads)
-
-    setmetatable(this, self)
-    return this
+    self.spritebatch = love.graphics.newSpriteBatch(self.image, #self.quads)
 end
 
 
-function Map:draw()
+function TiledMap:draw(width, height)
     -- Iterate over each layer
     for i, layer in ipairs(self.map.layers) do
 
@@ -54,7 +50,8 @@ function Map:draw()
             end -- y
         end -- visible
     end -- layer
-    love.graphics.draw(self.spritebatch, 0, 0)
+    
+    love.graphics.draw(self.spritebatch, 0, height - self.tileset.tileheight * self.map.height)
 end
 
-return Map
+return TiledMap
