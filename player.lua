@@ -26,7 +26,11 @@ function Player:init(x, y)
         love.graphics.newQuad(32 + 2, 0, self.width, self.height, texture:getDimensions()),
         love.graphics.newQuad(48 + 2, 0, self.width, self.height, texture:getDimensions())
     }
-    self.animation = Animation(animationFrames, 15, 1)
+    self.animations = {}
+    self.animations['idle'] = Animation({love.graphics.newQuad(0, 0, self.width, self.height, texture:getDimensions())}, 1, 1)
+    self.animations['walk'] = Animation(animationFrames, 15, 1)
+
+    self.animationKey = 'idle'
 
     self.flipX = false
     self.flipY = false
@@ -36,16 +40,16 @@ function Player:update(dt)
     if love.keyboard.isDown('left') then
         self.x = self.x - self.speed * dt
         self.flipX = true
-        self.animation:play()
+        self.animationKey = 'walk'
     elseif love.keyboard.isDown('right') then
         self.x = self.x + self.speed * dt
         self.flipX = false
-        self.animation:play()
+        self.animationKey = 'walk'
     else
-        self.animation:stop()
+        self.animationKey = 'idle'
     end
 
-    self.animation:update(dt)
+    self.animations[self.animationKey]:update(dt)
 end
 
 -- Override
@@ -57,7 +61,7 @@ function Player:draw()
 
     love.graphics.draw(
         self.image,         -- drawable
-        self.animation:getCurrentFrame(),  -- quad
+        self.animations[self.animationKey]:getCurrentFrame(),  -- quad
         self.x,             -- x
         self.y,             -- y
         0,                  -- rotation

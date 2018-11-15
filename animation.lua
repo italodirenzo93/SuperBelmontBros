@@ -9,7 +9,7 @@ function Animation:init(quads, speed, frameTime)
     self.frameTime = frameTime or 10
     self.elapsed = 0
     self.currentFrame = 1
-    self.isPlaying = false
+    self.isPlaying = true
 end
 
 function Animation:update(dt)
