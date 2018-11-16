@@ -1,15 +1,16 @@
 return {
   version = "1.2",
   luaversion = "5.1",
-  tiledversion = "1.2.0",
+  tiledversion = "1.2.1",
   orientation = "orthogonal",
-  renderorder = "right-up",
+  renderorder = "right-down",
   width = 240,
   height = 13,
   tilewidth = 16,
   tileheight = 16,
   nextlayerid = 3,
   nextobjectid = 1,
+  backgroundcolor = { 85, 170, 255 },
   properties = {},
   tilesets = {
     {
@@ -21,7 +22,7 @@ return {
       spacing = 0,
       margin = 0,
       columns = 16,
-      image = "tiles_2.png",
+      image = "../images/tiles_2.png",
       imagewidth = 256,
       imageheight = 192,
       tileoffset = {

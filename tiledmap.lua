@@ -9,7 +9,7 @@ function TiledMap:init(path)
 
     -- Generate quads
     local tileset = self.tileset
-    self.image = love.graphics.newImage('images/' .. tileset.image)
+    self.image = love.graphics.newImage('images/' .. tileset.image:match('^.+/(.+)$'))
     for y = 0, (tileset.imageheight / tileset.tileheight) - 1 do
         for x = 0, (tileset.imagewidth / tileset.tilewidth) -1 do
             local quad = love.graphics.newQuad(
@@ -29,6 +29,11 @@ end
 
 
 function TiledMap:draw()
+    -- Set background color (normalize RGB values between 0-1)
+    local r, g, b = unpack(self.map.backgroundcolor)
+    local len = math.sqrt(r * r + g * g + b * b)
+    love.graphics.setBackgroundColor(r / len, g / len, b / len)
+
     -- Clear out the contents of the spritebatch
     self.spritebatch:clear()
 
