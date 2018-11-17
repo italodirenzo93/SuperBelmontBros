@@ -6,7 +6,7 @@ local Animation = require 'animation'
 -- Class definition
 local Player = Class{__includes = Sprite}
 
-function Player:init(x, y)
+function Player:init(x, y, world)
     local texture = love.graphics.newImage('images/mario1.png')
 
     -- call superclass constructor
@@ -27,13 +27,19 @@ function Player:init(x, y)
         love.graphics.newQuad(48 + 2, 0, self.width, self.height, texture:getDimensions())
     }
     self.animations = {}
-    self.animations['idle'] = Animation({love.graphics.newQuad(0, 0, self.width, self.height, texture:getDimensions())}, 1, 1)
+    self.animations['idle'] = Animation({animationFrames[1]}, 1, 1)
     self.animations['walk'] = Animation(animationFrames, 15, 1)
 
     self.animationKey = 'idle'
 
     self.flipX = false
     self.flipY = false
+
+    -- set up physics body
+    local shape = love.physics.newRectangleShape(self.width, self.height)
+    local body = love.physics.newBody(world, self.x, self.y, 'dynamic')
+    local fixture = love.physics.newFixture(body, shape)
+    self.body = body
 end
 
 function Player:update(dt)
@@ -62,8 +68,8 @@ function Player:draw()
     love.graphics.draw(
         self.image,         -- drawable
         self.animations[self.animationKey]:getCurrentFrame(),  -- quad
-        self.x,             -- x
-        self.y,             -- y
+        self.body:getX(),             -- x
+        self.body:getY(),             -- y
         0,                  -- rotation
         sx,                 -- scale x
         sy,                  -- scale y,

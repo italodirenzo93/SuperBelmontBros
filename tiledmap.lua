@@ -1,8 +1,10 @@
+-- Module imports
 local Class = require 'libs/hump.class'
 
+-- Class definition
 local TiledMap = Class{}
 
-function TiledMap:init(path)
+function TiledMap:init(path, world)
     self.map = require(path)
     self.quads = {}
     self.tileset = self.map.tilesets[1]
@@ -25,6 +27,23 @@ function TiledMap:init(path)
 
     -- create a spritebatch
     self.spritebatch = love.graphics.newSpriteBatch(self.image, #self.quads)
+
+    -- create static physics bodies
+    local collisionLayer = self:getLayer('Collision')
+    local shape, body, fixture
+    for i, object in ipairs(collisionLayer) do
+        if object.type == 'rectangle' then
+            -- create rectangle shape
+            shape = love.physics.newRectangleShape(object.width, object.height)
+
+            -- create body
+            body = love.physics.newBody(world, object.x, object.y, 'static')
+
+            -- create fixture
+            fixture = love.physics.newFixture(body, shape)
+        end
+    end
+
 end
 
 
@@ -39,7 +58,7 @@ function TiledMap:draw()
 
     -- Iterate over each layer and add the quads to the spritebatch
     for i, layer in ipairs(self.map.layers) do
-        if layer.visible then
+        if layer.visible and layer.type == 'tilelayer' then
             -- Draw tiles
             for y = 0, layer.height - 1 do
                 for x = 0, layer.width - 1 do
@@ -60,6 +79,14 @@ function TiledMap:draw()
     
     -- Draw the map
     love.graphics.draw(self.spritebatch, 0, 0)
+end
+
+function TiledMap:getLayer(name)
+    for i, layer in ipairs(self.map.layers) do
+        if layer.name == name then
+            return layer
+        end
+    end
 end
 
 return TiledMap
