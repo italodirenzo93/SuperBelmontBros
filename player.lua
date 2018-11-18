@@ -11,6 +11,9 @@ local GRAVITY = 170
 local MAXXVELOCITY = 90
 local MAXYVELOCITY = 25
 
+-- Sounds
+local jumpSfx = nil
+
 function Player:init(x, y, world)
     local texture = love.graphics.newImage('images/mario1.png')
 
@@ -27,15 +30,19 @@ function Player:init(x, y, world)
     self.vx = 0
     self.vy = MAXYVELOCITY
 
+    local framePadding = 2
     local animationFrames = {
         love.graphics.newQuad(0, 0, self.width, self.height, texture:getDimensions()),
-        love.graphics.newQuad(16 + 2, 0, self.width, self.height, texture:getDimensions()),
-        love.graphics.newQuad(32 + 2, 0, self.width, self.height, texture:getDimensions()),
-        love.graphics.newQuad(48 + 2, 0, self.width, self.height, texture:getDimensions())
+        love.graphics.newQuad(16 + framePadding, 0, self.width, self.height, texture:getDimensions()),
+        love.graphics.newQuad(32 + framePadding, 0, self.width, self.height, texture:getDimensions()),
+        love.graphics.newQuad(48 + framePadding, 0, self.width, self.height, texture:getDimensions())
     }
     self.animations = {}
     self.animations['idle'] = Animation({animationFrames[1]}, 1, 1)
     self.animations['walk'] = Animation(animationFrames, 15, 1)
+
+    local jumpFrame = love.graphics.newQuad(88, 0, self.width, self.height, texture:getDimensions())
+    self.animations['jump'] = Animation({jumpFrame}, 1, 1)
 
     self.animationKey = 'idle'
 
@@ -44,6 +51,9 @@ function Player:init(x, y, world)
 
     -- create bounding box for collision
     world:add(self, self:getX(), self:getY(), self.width, self.height)
+
+    -- init sounds
+    jumpSfx = love.audio.newSource('sounds/smb_jump-small.wav', 'static')
 end
 
 local function checkCollision(player, collision)
@@ -56,17 +66,21 @@ function Player:update(dt, world)
     if love.keyboard.isDown('left') then
         self.vx = -MAXXVELOCITY
         self.flipX = true
-        self.animationKey = 'walk'
     elseif love.keyboard.isDown('right') then
         self.vx = MAXXVELOCITY
         self.flipX = false
-        self.animationKey = 'walk'
     else
         self.vx = 0
-        self.animationKey = 'idle'
     end
 
     -- update animation
+    if self.isJumping then
+        self.animationKey = 'jump'
+    elseif self.vx ~= 0 then
+        self.animationKey = 'walk'
+    else
+        self.animationKey = 'idle'
+    end
     self.animations[self.animationKey]:update(dt)
 
     -- update position
@@ -90,7 +104,11 @@ function Player:keypressed(key, scancode, isrepeat)
     if key == 'space' and not self.isJumping then
         -- jump
         self.vy = -100
+        self.animationKey = 'jump'
         self.isJumping = true
+
+        -- play jump sound
+        jumpSfx:play()
     end
 end
 
