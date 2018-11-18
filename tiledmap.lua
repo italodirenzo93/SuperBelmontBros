@@ -28,22 +28,13 @@ function TiledMap:init(path, world)
     -- create a spritebatch
     self.spritebatch = love.graphics.newSpriteBatch(self.image, #self.quads)
 
-    -- create static physics bodies
+    -- create bounding boxes for collision layer
     local collisionLayer = self:getLayer('Collision')
-    local shape, body, fixture
-    for i, object in ipairs(collisionLayer) do
-        if object.type == 'rectangle' then
-            -- create rectangle shape
-            shape = love.physics.newRectangleShape(object.width, object.height)
-
-            -- create body
-            body = love.physics.newBody(world, object.x, object.y, 'static')
-
-            -- create fixture
-            fixture = love.physics.newFixture(body, shape)
+    for i, object in ipairs(collisionLayer.objects) do
+        if object.shape == 'rectangle' then
+            world:add(object, object.x, object.y, object.width, object.height)
         end
     end
-
 end
 
 

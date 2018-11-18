@@ -22,4 +22,12 @@ function Sprite:getY()
     return self.y - self.originY
 end
 
+function Sprite:setX(x)
+    self.x = x + self.originX
+end
+
+function Sprite:setY(y)
+    self.y = y + self.originY
+end
+
 return Sprite

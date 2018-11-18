@@ -115,7 +115,7 @@ return {
         {
           id = 1,
           name = "",
-          type = "",
+          type = "Ground",
           shape = "rectangle",
           x = 1,
           y = 176,
