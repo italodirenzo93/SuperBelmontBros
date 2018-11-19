@@ -19,22 +19,22 @@ function love.load()
 
     -- Load sprites
     local playerStart = map:getLayer('Player').objects[1]
-    mario = Player(playerStart.x, playerStart.y, world)
+    player = Player(playerStart.x, playerStart.y, world)
 
     -- Init camera
-    camera = Camera(mario:getX(), mario:getY(), 1.5)
+    camera = Camera(player:getX(), player:getY(), 1.3)
 end
 
 function love.update(dt)
-    mario:update(dt, world)
+    player:update(dt, world)
 
     -- Camera follows player
-    local dx, dy = mario:getX() - camera.x, mario:getY() - camera.y
+    local dx, dy = player:getX() - camera.x, player:getY() - camera.y
     camera:move(dx/2, dy/2)
 end
 
 function love.keypressed(key, scancode, isrepeat)
-    mario:keypressed(key, scancode, isrepeat)
+    player:keypressed(key, scancode, isrepeat)
 end
 
 function love.draw()
@@ -46,7 +46,7 @@ function love.draw()
 
     -- Draw game
     map:draw()
-    mario:draw()
+    player:draw()
 
     if DEBUG_COLLISIONS then
         -- Draw bounding boxes (debug)
