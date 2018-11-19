@@ -31,7 +31,7 @@ function TiledMap:init(path, world)
     -- create bounding boxes for collision layer
     local collisionLayer = self:getLayer('Collision')
     for i, object in ipairs(collisionLayer.objects) do
-        if object.shape == 'rectangle' then
+        if object.visible and object.shape == 'rectangle' then
             world:add(object, object.x, object.y, object.width, object.height)
         end
     end

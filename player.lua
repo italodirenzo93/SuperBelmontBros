@@ -11,6 +11,9 @@ local GRAVITY = 170
 local MAXXVELOCITY = 90
 local MAXYVELOCITY = 25
 
+-- Sounds
+local jumpSfx = nil
+
 function Player:init(x, y, world)
     local texture = love.graphics.newImage('images/mario1.png')
 
@@ -27,11 +30,12 @@ function Player:init(x, y, world)
     self.vx = 0
     self.vy = MAXYVELOCITY
 
+    local framePadding = 2
     local animationFrames = {
         love.graphics.newQuad(0, 0, self.width, self.height, texture:getDimensions()),
-        love.graphics.newQuad(16 + 2, 0, self.width, self.height, texture:getDimensions()),
-        love.graphics.newQuad(32 + 2, 0, self.width, self.height, texture:getDimensions()),
-        love.graphics.newQuad(48 + 2, 0, self.width, self.height, texture:getDimensions())
+        love.graphics.newQuad(16 + framePadding, 0, self.width, self.height, texture:getDimensions()),
+        love.graphics.newQuad(32 + framePadding, 0, self.width, self.height, texture:getDimensions()),
+        love.graphics.newQuad(48 + framePadding, 0, self.width, self.height, texture:getDimensions())
     }
     self.animations = {}
     self.animations['idle'] = Animation{animationFrames[1]}
@@ -45,6 +49,9 @@ function Player:init(x, y, world)
 
     -- create bounding box for collision
     world:add(self, self:getX(), self:getY(), self.width, self.height)
+
+    -- init sounds
+    jumpSfx = love.audio.newSource('sounds/smb_jump-small.wav', 'static')
 end
 
 local function checkCollision(player, collision)
@@ -95,7 +102,11 @@ function Player:keypressed(key, scancode, isrepeat)
     if key == 'space' and not self.isJumping then
         -- jump
         self.vy = -100
+        self.animationKey = 'jump'
         self.isJumping = true
+
+        -- play jump sound
+        jumpSfx:play()
     end
 end
 

@@ -23,6 +23,10 @@ function love.load()
 
     -- Init camera
     camera = Camera(mario:getX(), mario:getY(), 2)
+
+    -- load the music
+    music = love.audio.newSource('sounds/music.mp3', 'stream')
+    music:play()
 end
 
 function love.update(dt)
