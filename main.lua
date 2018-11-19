@@ -22,7 +22,7 @@ function love.load()
     player = Player(playerStart.x, playerStart.y, world)
 
     -- Init camera
-    camera = Camera(player:getX(), player:getY(), 1.3)
+    camera = Camera(player:getX(), love.graphics.getHeight()/2)
 end
 
 function love.update(dt)
@@ -30,7 +30,7 @@ function love.update(dt)
 
     -- Camera follows player
     local dx, dy = player:getX() - camera.x, player:getY() - camera.y
-    camera:move(dx/2, dy/2)
+    camera:move(dx/2, 0)
 end
 
 function love.keypressed(key, scancode, isrepeat)
