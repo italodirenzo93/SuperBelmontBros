@@ -11,18 +11,15 @@ local GRAVITY = 170
 local MAXXVELOCITY = 90
 local MAXYVELOCITY = 25
 
--- Sounds
-local jumpSfx = nil
-
 function Player:init(x, y, world)
-    local texture = love.graphics.newImage('images/mario1.png')
+    local texture = love.graphics.newImage('images/sheet-simon.png')
 
     -- call superclass constructor
     Sprite.init(self, texture, x or 0, y or 0)
 
     self.name = 'Player'
     self.width = 16
-    self.height = 32
+    self.height = 31
 
     self.originX = self.width / 2
     self.originY = self.height / 2
@@ -30,28 +27,25 @@ function Player:init(x, y, world)
     self.vx = 0
     self.vy = MAXYVELOCITY
 
-    local framePadding = 2
     local animationFrames = {
-        love.graphics.newQuad(0, 0, self.width, self.height, texture:getDimensions()),
-        love.graphics.newQuad(16 + framePadding, 0, self.width, self.height, texture:getDimensions()),
-        love.graphics.newQuad(32 + framePadding, 0, self.width, self.height, texture:getDimensions()),
-        love.graphics.newQuad(48 + framePadding, 0, self.width, self.height, texture:getDimensions())
+        love.graphics.newQuad(8, 0, self.width, self.height, texture:getDimensions()),
+        love.graphics.newQuad(50, 0, 12, 31, texture:getDimensions()),
+        love.graphics.newQuad(88, 0, self.width, self.height, texture:getDimensions())
     }
     self.animations = {}
     self.animations['idle'] = Animation{animationFrames[1]}
     self.animations['walk'] = Animation(animationFrames, 0.115)
-    self.animations['jump'] = Animation{love.graphics.newQuad(88, 0, self.width, self.height, texture:getDimensions())}
+    self.animations['jump'] = Animation{love.graphics.newQuad(208, 4, 16, 23, texture:getDimensions())}
 
     self.animationKey = 'idle'
 
     self.flipX = false
     self.flipY = false
+    self.scaleX = 2
+    self.scaleY = 2
 
     -- create bounding box for collision
-    world:add(self, self:getX(), self:getY(), self.width, self.height)
-
-    -- init sounds
-    jumpSfx = love.audio.newSource('sounds/smb_jump-small.wav', 'static')
+    world:add(self, self:getX(), self:getY(), self.width * self.scaleX, self.height * self.scaleY)
 end
 
 local function checkCollision(player, collision)
@@ -104,18 +98,15 @@ function Player:keypressed(key, scancode, isrepeat)
         self.vy = -100
         self.animationKey = 'jump'
         self.isJumping = true
-
-        -- play jump sound
-        jumpSfx:play()
     end
 end
 
 -- Override
 function Player:draw()
-    -- Set scale factor based on flipp booleans
-    local sx, sy = 1, 1
-    if self.flipX then sx = -1 end
-    if self.flipY then sy = -1 end
+    -- Check flip booleans
+    local sx, sy = self.scaleX, self.scaleY
+    if self.flipX then sx = -sx end
+    if self.flipY then sy = -sy end
 
     love.graphics.setColor(1,1,1)
     love.graphics.draw(

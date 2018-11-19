@@ -5,7 +5,7 @@ local TiledMap = require 'tiledmap'
 local Player = require 'player'
 
 -- Constants
-local DEBUG_COLLISIONS = false
+local DEBUG_COLLISIONS = true
 
 function love.load()
     -- Preserve the NES "pixelated" look
@@ -22,11 +22,7 @@ function love.load()
     mario = Player(playerStart.x, playerStart.y, world)
 
     -- Init camera
-    camera = Camera(mario:getX(), mario:getY(), 2)
-
-    -- load the music
-    music = love.audio.newSource('sounds/music.mp3', 'stream')
-    music:play()
+    camera = Camera(mario:getX(), mario:getY(), 1.5)
 end
 
 function love.update(dt)
