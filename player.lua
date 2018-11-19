@@ -7,9 +7,9 @@ local Animation = require 'animation'
 local Player = Class{__includes = Sprite}
 
 -- Constants
-local GRAVITY = 170
-local MAXXVELOCITY = 90
-local MAXYVELOCITY = 25
+local GRAVITY = 240
+local MAXXVELOCITY = 140
+local MAXYVELOCITY = 140
 
 function Player:init(x, y, world)
     local texture = love.graphics.newImage('images/sheet-simon.png')
@@ -49,7 +49,9 @@ function Player:init(x, y, world)
 end
 
 local function checkCollision(player, collision)
-    if collision.other.type == 'Ground' then
+    local thisRect, otherRect = collision.itemRect, collision.otherRect
+    -- Check if we landed on the ground
+    if collision.other.type == 'Ground' and otherRect.y > thisRect.y + thisRect.h then
         player.isJumping = false
     end
 end
@@ -95,7 +97,7 @@ end
 function Player:keypressed(key, scancode, isrepeat)
     if key == 'space' and not self.isJumping then
         -- jump
-        self.vy = -100
+        self.vy = -180
         self.animationKey = 'jump'
         self.isJumping = true
     end
