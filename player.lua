@@ -34,8 +34,9 @@ function Player:init(x, y, world)
         love.graphics.newQuad(48 + 2, 0, self.width, self.height, texture:getDimensions())
     }
     self.animations = {}
-    self.animations['idle'] = Animation({animationFrames[1]}, 1, 1)
-    self.animations['walk'] = Animation(animationFrames, 15, 1)
+    self.animations['idle'] = Animation{animationFrames[1]}
+    self.animations['walk'] = Animation(animationFrames, 0.115)
+    self.animations['jump'] = Animation{love.graphics.newQuad(88, 0, self.width, self.height, texture:getDimensions())}
 
     self.animationKey = 'idle'
 
@@ -55,18 +56,22 @@ end
 function Player:update(dt, world)
     if love.keyboard.isDown('left') then
         self.vx = -MAXXVELOCITY
-        self.flipX = true
-        self.animationKey = 'walk'
+        if not self.isJumping then self.flipX = true end
     elseif love.keyboard.isDown('right') then
         self.vx = MAXXVELOCITY
-        self.flipX = false
-        self.animationKey = 'walk'
+        if not self.isJumping then self.flipX = false end
     else
         self.vx = 0
-        self.animationKey = 'idle'
     end
 
     -- update animation
+    if self.isJumping then
+        self.animationKey = 'jump'
+    elseif self.vx ~= 0 then
+        self.animationKey = 'walk'
+    else
+        self.animationKey = 'idle'
+    end
     self.animations[self.animationKey]:update(dt)
 
     -- update position
@@ -101,6 +106,7 @@ function Player:draw()
     if self.flipX then sx = -1 end
     if self.flipY then sy = -1 end
 
+    love.graphics.setColor(1,1,1)
     love.graphics.draw(
         self.image,         -- drawable
         self.animations[self.animationKey]:getCurrentFrame(),  -- quad

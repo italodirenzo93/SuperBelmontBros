@@ -4,6 +4,8 @@ local bump = require 'libs/bump.bump'
 local TiledMap = require 'tiledmap'
 local Player = require 'player'
 
+-- Constants
+local DEBUG_COLLISIONS = false
 
 function love.load()
     -- Preserve the NES "pixelated" look
@@ -46,14 +48,16 @@ function love.draw()
     map:draw()
     mario:draw()
 
-    -- Draw bounding boxes (debug)
-    love.graphics.setColor(0,1,0)
-    local items, len = world:getItems()
-    for i = 1, len do
-        local x, y, w, h = world:getRect(items[i])
-        love.graphics.rectangle('line', x, y, w, h)
+    if DEBUG_COLLISIONS then
+        -- Draw bounding boxes (debug)
+        love.graphics.setColor(0,1,0)
+        local items, len = world:getItems()
+        for i = 1, len do
+            local x, y, w, h = world:getRect(items[i])
+            love.graphics.rectangle('line', x, y, w, h)
+        end
     end
-    
+
     -- Finish drawing
     camera:detach()
 

@@ -3,10 +3,9 @@ local Class = require 'libs/hump.class'
 -- Class definition
 local Animation = Class{}
 
-function Animation:init(quads, speed, frameTime)
+function Animation:init(quads, frameTime)
     self.quads = quads or {}
-    self.speed = speed or 15
-    self.frameTime = frameTime or 10
+    self.frameTime = frameTime or 0
     self.elapsed = 0
     self.currentFrame = 1
     self.isPlaying = true
@@ -14,7 +13,7 @@ end
 
 function Animation:update(dt)
     if self.isPlaying then
-        self.elapsed = self.elapsed + self.speed * dt
+        self.elapsed = self.elapsed + dt
         if self.elapsed >= self.frameTime then
             self.elapsed = 0
             -- Next frame
