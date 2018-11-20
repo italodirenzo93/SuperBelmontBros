@@ -27,18 +27,6 @@ function Player:init(x, y, world)
     self.vx = 0
     self.vy = MAXYVELOCITY
 
-    local animationFrames = {
-        love.graphics.newQuad(8, 0, self.width, self.height, texture:getDimensions()),
-        love.graphics.newQuad(50, 0, 12, 31, texture:getDimensions()),
-        love.graphics.newQuad(88, 0, self.width, self.height, texture:getDimensions())
-    }
-    self.animations = {}
-    self.animations['idle'] = Animation{animationFrames[1]}
-    self.animations['walk'] = Animation(animationFrames, 0.115)
-    self.animations['jump'] = Animation{love.graphics.newQuad(208, 4, 16, 23, texture:getDimensions())}
-
-    self.animation = self.animations['idle']
-
     self.flipX = false
     self.flipY = false
     self.scaleX = 2
@@ -46,36 +34,101 @@ function Player:init(x, y, world)
 
     -- create bounding box for collision
     world:add(self, self:getX(), self:getY(), self.width * self.scaleX, self.height * self.scaleY)
+
+    self.states = {
+        idle = {
+            animation = Animation{ love.graphics.newQuad(8, 0, self.width, self.height, texture:getDimensions()) },
+
+            onupdate = function (state, dt)
+                self.vx = 0
+            end
+        },
+
+        walk = {
+            animation = Animation({
+                love.graphics.newQuad(8, 0, self.width, self.height, texture:getDimensions()),
+                love.graphics.newQuad(50, 0, 12, 31, texture:getDimensions()),
+                love.graphics.newQuad(88, 0, self.width, self.height, texture:getDimensions())
+            }, 0.115),
+
+            onupdate = function (state, dt)
+                if love.keyboard.isDown('left') then
+                    self.vx = -MAXXVELOCITY
+                    self.flipX = true
+                end
+                if love.keyboard.isDown('right') then
+                    self.vx = MAXXVELOCITY
+                    self.flipX = false
+                end
+                state.animation:update(dt)
+            end
+        },
+
+        jump = {
+            animation = Animation{ love.graphics.newQuad(208, 4, 16, 23, texture:getDimensions()) },
+
+            onenter = function (state)
+                self.vy = -180
+                self.isJumping = true
+            end,
+
+            onupdate = function (state, dt)
+                if love.keyboard.isDown('left') then
+                    self.vx = -MAXXVELOCITY
+                end
+                if love.keyboard.isDown('right') then
+                    self.vx = MAXXVELOCITY
+                end
+            end,
+
+            onleave = function (state)
+                self.isJumping = false
+            end
+        },
+
+        attack = {
+            animation = Animation({
+                love.graphics.newQuad(0, 41, 31, 30, texture:getDimensions()),
+                love.graphics.newQuad(46, 40, 60, 30, texture:getDimensions())
+            }, 0.115),
+
+            onupdate = function (state, dt)
+                state.animation:update(dt)
+            end
+        }
+    }
+
+    self.state = self.states['idle']
+end
+
+local function switchState(player, key)
+    -- Leave the previous state
+    if player.state.onleave ~= nil then
+        player.state:onleave()
+    end
+
+    -- assign new state
+    player.state = player.states[key]
+
+    -- Enter the new state
+    if player.state.onenter ~= nil then
+        player.state:onenter()
+    end
 end
 
 local function checkCollision(player, collision)
     local thisRect, otherRect = collision.itemRect, collision.otherRect
     -- Check if we landed on the ground
     if collision.other.type == 'Ground' and otherRect.y > thisRect.y + thisRect.h then
-        player.isJumping = false
+        switchState(player, 'idle')
     end
 end
 
 function Player:update(dt, world)
-    if love.keyboard.isDown('left') then
-        self.vx = -MAXXVELOCITY
-        if not self.isJumping then self.flipX = true end
-    elseif love.keyboard.isDown('right') then
-        self.vx = MAXXVELOCITY
-        if not self.isJumping then self.flipX = false end
-    else
-        self.vx = 0
+    -- Update state
+    if self.state.onupdate ~= nil then
+        self.state:onupdate(dt)
     end
-
-    -- update animation
-    if self.isJumping then
-        self.animation = self.animations['jump']
-    elseif self.vx ~= 0 then
-        self.animation = self.animations['walk']
-    else
-        self.animation = self.animations['idle']
-    end
-    self.animation:update(dt)
 
     -- update position
     local goalX, goalY = self:getX() + self.vx * dt, self:getY() + self.vy * dt
@@ -96,10 +149,17 @@ end
 
 function Player:keypressed(key, scancode, isrepeat)
     if key == 'space' and not self.isJumping then
-        -- jump
-        self.vy = -180
-        self.animationKey = 'jump'
-        self.isJumping = true
+        switchState(self, 'jump')
+    elseif (key == 'left' or key == 'right') and not self.isJumping then
+        switchState(self, 'walk')
+    elseif key == 'z' then
+        switchState(self, 'attack')
+    end
+end
+
+function Player:keyreleased(key, scancode, isrepeat)
+    if (key == 'left' or key == 'right') and not self.isJumping then
+        switchState(self, 'idle')
     end
 end
 
@@ -113,7 +173,7 @@ function Player:draw()
     love.graphics.setColor(1,1,1)
     love.graphics.draw(
         self.image,         -- drawable
-        self.animation:getCurrentFrame(),  -- quad
+        self.state.animation:getCurrentFrame(),  -- quad
         self.x,             -- x
         self.y,             -- y
         0,                  -- rotation

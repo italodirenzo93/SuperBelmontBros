@@ -37,6 +37,10 @@ function love.keypressed(key, scancode, isrepeat)
     player:keypressed(key, scancode, isrepeat)
 end
 
+function love.keyreleased(key, scancode, isrepeat)
+    player:keyreleased(key, scancode, isrepeat)
+end
+
 function love.draw()
     -- Set clear color to white
     love.graphics.setColor(1,1,1)
