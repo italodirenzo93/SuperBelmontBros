@@ -37,7 +37,7 @@ function Player:init(x, y, world)
     self.animations['walk'] = Animation(animationFrames, 0.115)
     self.animations['jump'] = Animation{love.graphics.newQuad(208, 4, 16, 23, texture:getDimensions())}
 
-    self.animationKey = 'idle'
+    self.animation = self.animations['idle']
 
     self.flipX = false
     self.flipY = false
@@ -69,13 +69,13 @@ function Player:update(dt, world)
 
     -- update animation
     if self.isJumping then
-        self.animationKey = 'jump'
+        self.animation = self.animations['jump']
     elseif self.vx ~= 0 then
-        self.animationKey = 'walk'
+        self.animation = self.animations['walk']
     else
-        self.animationKey = 'idle'
+        self.animation = self.animations['idle']
     end
-    self.animations[self.animationKey]:update(dt)
+    self.animation:update(dt)
 
     -- update position
     local goalX, goalY = self:getX() + self.vx * dt, self:getY() + self.vy * dt
@@ -113,7 +113,7 @@ function Player:draw()
     love.graphics.setColor(1,1,1)
     love.graphics.draw(
         self.image,         -- drawable
-        self.animations[self.animationKey]:getCurrentFrame(),  -- quad
+        self.animation:getCurrentFrame(),  -- quad
         self.x,             -- x
         self.y,             -- y
         0,                  -- rotation

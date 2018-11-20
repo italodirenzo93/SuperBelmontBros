@@ -12,7 +12,7 @@ function Animation:init(quads, frameTime)
 end
 
 function Animation:update(dt)
-    if self.isPlaying then
+    if self.frameTime > 0 and self.isPlaying then
         self.elapsed = self.elapsed + dt
         if self.elapsed >= self.frameTime then
             self.elapsed = 0

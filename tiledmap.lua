@@ -41,8 +41,7 @@ end
 function TiledMap:draw()
     -- Set background color (normalize RGB values between 0-1)
     local r, g, b = unpack(self.map.backgroundcolor)
-    local len = math.sqrt(r * r + g * g + b * b)
-    love.graphics.setBackgroundColor(r / len, g / len, b / len)
+    love.graphics.setBackgroundColor(r / 255, g / 255, b / 255)
 
     -- Clear out the contents of the spritebatch
     self.spritebatch:clear()

@@ -5,7 +5,7 @@ local TiledMap = require 'tiledmap'
 local Player = require 'player'
 
 -- Constants
-local DEBUG_COLLISIONS = false
+local DEBUG_COLLISIONS = true
 
 function love.load()
     -- Preserve the NES "pixelated" look
