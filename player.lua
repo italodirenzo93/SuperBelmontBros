@@ -11,6 +11,34 @@ local GRAVITY = 240
 local MAXXVELOCITY = 140
 local MAXYVELOCITY = 140
 
+-- Private functions
+local function switchState(player, key)
+    -- get references to the current and next states
+    local currentState, nextState = player.state, player.states[key]
+
+    -- Leave the previous state
+    if currentState.onleave ~= nil then
+        currentState:onleave(nextState)
+    end
+
+    -- Enter the new state
+    if nextState.onenter ~= nil then
+        nextState:onenter(currentState)
+    end
+
+    -- assign new state
+    player.state = nextState
+end
+
+local function checkCollision(player, collision)
+    local thisRect, otherRect = collision.itemRect, collision.otherRect
+    -- Check if we landed on the ground
+    if collision.other.type == 'Ground' and otherRect.y > thisRect.y + thisRect.h then
+        switchState(player, 'idle')
+    end
+end
+
+-- Constructor
 function Player:init(x, y, world)
     local texture = love.graphics.newImage('images/sheet-simon.png')
 
@@ -37,19 +65,27 @@ function Player:init(x, y, world)
 
     self.states = {
         idle = {
+            name = 'idle',
+
             animation = Animation{ love.graphics.newQuad(8, 0, self.width, self.height, texture:getDimensions()) },
 
-            onupdate = function (state, dt)
+            onenter = function (state)
                 self.vx = 0
             end
         },
 
         walk = {
+            name = 'walk',
+
             animation = Animation({
                 love.graphics.newQuad(8, 0, self.width, self.height, texture:getDimensions()),
                 love.graphics.newQuad(50, 0, 12, 31, texture:getDimensions()),
                 love.graphics.newQuad(88, 0, self.width, self.height, texture:getDimensions())
-            }, 0.115),
+            }, 0.115, true),
+
+            onenter = function (state)
+                state.animation:play()
+            end,
 
             onupdate = function (state, dt)
                 if love.keyboard.isDown('left') then
@@ -65,11 +101,12 @@ function Player:init(x, y, world)
         },
 
         jump = {
+            name = 'jump',
+
             animation = Animation{ love.graphics.newQuad(208, 4, 16, 23, texture:getDimensions()) },
 
-            onenter = function (state)
+            onenter = function (state, prevState)
                 self.vy = -180
-                self.isJumping = true
             end,
 
             onupdate = function (state, dt)
@@ -79,18 +116,24 @@ function Player:init(x, y, world)
                 if love.keyboard.isDown('right') then
                     self.vx = MAXXVELOCITY
                 end
-            end,
-
-            onleave = function (state)
-                self.isJumping = false
             end
         },
 
         attack = {
-            animation = Animation({
-                love.graphics.newQuad(0, 41, 31, 30, texture:getDimensions()),
-                love.graphics.newQuad(46, 40, 60, 30, texture:getDimensions())
-            }, 0.115),
+            name = 'attack',
+
+            animation = (function ()
+                local anim = Animation({
+                    love.graphics.newQuad(0, 41, 31, 30, texture:getDimensions()),
+                    love.graphics.newQuad(46, 41, 60, 29, texture:getDimensions())
+                }, 0.15)
+                anim.onanimationend = function () switchState(self, 'idle') end
+                return anim
+            end)(),
+
+            onenter = function (state)
+                state.animation:play()
+            end,
 
             onupdate = function (state, dt)
                 state.animation:update(dt)
@@ -99,29 +142,6 @@ function Player:init(x, y, world)
     }
 
     self.state = self.states['idle']
-end
-
-local function switchState(player, key)
-    -- Leave the previous state
-    if player.state.onleave ~= nil then
-        player.state:onleave()
-    end
-
-    -- assign new state
-    player.state = player.states[key]
-
-    -- Enter the new state
-    if player.state.onenter ~= nil then
-        player.state:onenter()
-    end
-end
-
-local function checkCollision(player, collision)
-    local thisRect, otherRect = collision.itemRect, collision.otherRect
-    -- Check if we landed on the ground
-    if collision.other.type == 'Ground' and otherRect.y > thisRect.y + thisRect.h then
-        switchState(player, 'idle')
-    end
 end
 
 function Player:update(dt, world)
@@ -148,9 +168,9 @@ function Player:update(dt, world)
 end
 
 function Player:keypressed(key, scancode, isrepeat)
-    if key == 'space' and not self.isJumping then
+    if key == 'space' and self.state.name ~= 'jump' then
         switchState(self, 'jump')
-    elseif (key == 'left' or key == 'right') and not self.isJumping then
+    elseif (key == 'left' or key == 'right') and self.state.name ~= 'jump' then
         switchState(self, 'walk')
     elseif key == 'z' then
         switchState(self, 'attack')
@@ -158,7 +178,7 @@ function Player:keypressed(key, scancode, isrepeat)
 end
 
 function Player:keyreleased(key, scancode, isrepeat)
-    if (key == 'left' or key == 'right') and not self.isJumping then
+    if (key == 'left' or key == 'right') and self.state.name ~= 'jump' then
         switchState(self, 'idle')
     end
 end
