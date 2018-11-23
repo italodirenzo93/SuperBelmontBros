@@ -34,7 +34,11 @@ local function checkCollision(player, collision)
     local thisRect, otherRect = collision.itemRect, collision.otherRect
     -- Check if we landed on the ground
     if collision.other.type == 'Ground' and otherRect.y > thisRect.y + thisRect.h then
-        switchState(player, 'idle')
+        if love.keyboard.isDown('left', 'right') then
+            switchState(player, 'walk')
+        else
+            switchState(player, 'idle')
+        end
     end
 end
 
